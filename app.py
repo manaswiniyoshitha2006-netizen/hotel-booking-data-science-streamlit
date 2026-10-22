@@ -13,51 +13,8 @@ from analysis import (REQUIRED, demo_data, prepare, summarize, monthly_summary,
 
 st.set_page_config(page_title='Hotel Booking Analytics', page_icon='▦', layout='wide')
 px.defaults.template = 'plotly_white'
-px.defaults.color_discrete_sequence = ['#294d73', '#b99452', '#708b9c', '#7c796a', '#b7c6cf']
-st.markdown('''<style>
-.stApp {background:#f4f5f7;color:#202e3d}
-.block-container {padding:4rem 2.1rem 2rem;max-width:1600px}
-h1,h2,h3 {letter-spacing:-.025em;font-weight:600!important}
-h3 {font-size:19px!important;padding-top:12px!important}
-[data-testid="stHeader"] {background:#f4f5f7}
-[data-testid="stSidebar"] {background:#172636;border-right:1px solid #172636}
-[data-testid="stSidebar"] * {color:#e1e7ee}
-[data-testid="stSidebar"] [data-baseweb="select"] * {color:#26384a}
-[data-testid="stSidebar"] input {color:#26384a}
-[data-testid="stSidebar"] button {color:#26384a}
-[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {background:#25374a;border:1px dashed #536477}
-[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {background:#e1e7ee}
-[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button * {color:#26384a}
-[data-testid="stSidebar"] [role="radiogroup"] {gap:3px}
-[data-testid="stSidebar"] [role="radiogroup"] label {padding:8px 10px;border-radius:3px;margin:0}
-[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {background:#304358;border-left:3px solid #b99452}
-[data-testid="stSidebar"] [role="radiogroup"] label p {font-size:13px}
-[data-testid="stSidebar"] [data-testid="stRadioOption"] {width:100%}
-[data-testid="stSidebar"] [data-testid="stRadioOption"] > div > div:first-child {display:none}
-[data-testid="stMetric"] {background:#fff;border:1px solid #e1e5e9;border-top:3px solid #294d73;border-radius:3px;padding:17px 18px}
-[data-testid="stMetricLabel"] {color:#5d6875;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
-[data-testid="stMetricValue"] {color:#1e334a;font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
-[data-testid="stMetricDelta"] {font-size:11px}
-[data-testid="stMetricDelta"] svg {display:none}
-[data-testid="stPlotlyChart"] {background:white;border:1px solid #e1e5e9;border-radius:3px;padding:8px}
-[data-testid="stDataFrame"] {border:1px solid #e1e5e9;border-radius:3px}
-.identity {padding:3px 0 20px;border-bottom:1px solid #3a4857;margin-bottom:20px}
-.identity-mark {display:inline-block;border:1px solid #b99452;color:#d5bb8c;font:600 17px Georgia;padding:8px 10px;margin-bottom:12px}
-.identity strong {display:block;font-size:15px;color:#fff;letter-spacing:.02em}
-.identity span {font-size:10px;letter-spacing:.15em;color:#9cabb9}
-.masthead {display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #d8dee5;padding:0 0 18px;margin-bottom:16px;gap:20px}
-.masthead .overline {font-size:10px;letter-spacing:.16em;color:#6c7681;text-transform:uppercase;font-weight:600}
-.masthead h1 {font-size:29px;line-height:1.2;margin:7px 0;color:#1c3045;padding:0}
-.masthead p {font-size:13px;line-height:1.5;color:#66727f;margin:0}
-.status {font-size:10px;letter-spacing:.07em;border:1px solid #d8c49e;background:#f6f1e7;color:#786031;padding:6px 9px;white-space:nowrap}
-.source-note {font-size:12px;color:#716443;background:#f7f4ed;border-left:2px solid #b99452;padding:8px 12px;margin-bottom:17px}
-.section-heading {display:flex;justify-content:space-between;align-items:baseline;margin:25px 0 10px;border-bottom:1px solid #d8dee5;padding-bottom:9px}
-.section-heading strong {font-size:15px;color:#233a52;font-weight:600}
-.section-heading span {font-size:11px;color:#79838e}
-.analysis-note {font-size:12px;line-height:1.65;color:#526171;border-top:1px solid #e1e5e9;padding-top:10px;margin-bottom:12px}
-.stDownloadButton button,.stButton button {border-radius:3px;font-size:12px}
-@media(max-width:700px){.block-container{padding:4rem 1rem 1rem}.masthead h1{font-size:25px}.masthead{gap:10px}.status{font-size:9px}}
-</style>''', unsafe_allow_html=True)
+px.defaults.color_discrete_sequence = ['#3c6856', '#c38b67', '#91a58b', '#b1a579', '#d0d9c6']
+st.markdown('<style>' + (Path(__file__).parent / 'ui.css').read_text(encoding='utf-8') + '</style>', unsafe_allow_html=True)
 
 
 @st.cache_data(show_spinner=False, max_entries=3)
@@ -66,12 +23,12 @@ def load_csv(content):
 
 
 def chart(fig, height=340):
-    fig.update_layout(margin=dict(l=20, r=20, t=55, b=30), font=dict(family='Arial', color='#526171', size=11),
-        title_font=dict(size=14, color='#263d54'), paper_bgcolor='white', plot_bgcolor='white',
-        legend_title_text='', height=height, hoverlabel=dict(bgcolor='#172636',font_color='white'),
+    fig.update_layout(margin=dict(l=20, r=20, t=55, b=30), font=dict(family='Arial, sans-serif', color='#808a78', size=11),
+        title_font=dict(size=14, color='#334d3e'), paper_bgcolor='#fffefa', plot_bgcolor='#fffefa',
+        legend_title_text='', height=height, hoverlabel=dict(bgcolor='#254c40',font_color='white'),
         legend=dict(orientation='h',y=-.2,x=0), colorway=px.defaults.color_discrete_sequence)
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e1e5e9')
-    fig.update_yaxes(gridcolor='#edf0f3', zeroline=False)
+    fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e4e7dc')
+    fig.update_yaxes(gridcolor='#eceee5', zeroline=False)
     st.plotly_chart(fig, width='stretch')
 
 
@@ -90,7 +47,7 @@ def reset_filters():
 
 
 with st.sidebar:
-    st.markdown('<div class="identity"><div class="identity-mark">HB</div><strong>Hotel Booking Analytics</strong><span>RESEARCH & PERFORMANCE</span></div>',unsafe_allow_html=True)
+    st.markdown('<div class="identity"><div class="identity-mark">HB</div><strong>Hotel Booking Analytics</strong><span>RESEARCH WORKSPACE</span></div>',unsafe_allow_html=True)
     page = st.radio('Workspace', ['Overview', 'Seasonality', 'Cancellations', 'Guests & markets',
         'Hotel comparison', 'Statistics lab', 'Data explorer', 'Quality & methodology', 'Reports & Tableau'],
         label_visibility='collapsed',format_func=lambda p: {'Overview':'01  Portfolio overview','Seasonality':'02  Demand & seasonality','Cancellations':'03  Cancellation analysis','Guests & markets':'04  Guest & market mix','Hotel comparison':'05  Hotel benchmarking','Statistics lab':'06  Statistical analysis','Data explorer':'07  Booking register','Quality & methodology':'08  Data quality','Reports & Tableau':'09  Reporting & exports'}[p])
@@ -179,9 +136,9 @@ if page == 'Overview':
     with summary_tab:
         section('Demand and pricing','Monthly arrivals · observed bookings')
         trend = make_subplots(specs=[[{'secondary_y':True}]])
-        trend.add_trace(go.Bar(x=monthly.month,y=monthly.bookings-monthly.cancellations,name='Not canceled',marker_color='#294d73'),secondary_y=False)
-        trend.add_trace(go.Bar(x=monthly.month,y=monthly.cancellations,name='Canceled',marker_color='#b99452'),secondary_y=False)
-        trend.add_trace(go.Scatter(x=monthly.month,y=monthly.mean_adr,name='Mean ADR',mode='lines+markers',line=dict(color='#6e8580',width=2),marker=dict(size=4)),secondary_y=True)
+        trend.add_trace(go.Bar(x=monthly.month,y=monthly.bookings-monthly.cancellations,name='Not canceled',marker_color='#3c6856'),secondary_y=False)
+        trend.add_trace(go.Bar(x=monthly.month,y=monthly.cancellations,name='Canceled',marker_color='#c38b67'),secondary_y=False)
+        trend.add_trace(go.Scatter(x=monthly.month,y=monthly.mean_adr,name='Mean ADR',mode='lines+markers',line=dict(color='#b3a06e',width=2),marker=dict(size=4)),secondary_y=True)
         trend.update_layout(barmode='stack',title='Booking volume and average daily rate')
         trend.update_yaxes(title_text='Bookings',secondary_y=False)
         trend.update_yaxes(title_text='ADR · source currency',secondary_y=True,showgrid=False)
@@ -191,7 +148,7 @@ if page == 'Overview':
             market_col = 'market_segment' if 'market_segment' in filtered else 'guest_profile'
             market = summarize(filtered,market_col).sort_values('bookings').tail(8)
             chart(px.bar(market,x='bookings',y=market_col,orientation='h',title='Booking mix by '+market_col.replace('_',' '),
-                color_discrete_sequence=['#294d73'],hover_data=['cancellation_rate_pct','mean_adr'],labels={'bookings':'Bookings',market_col:''}))
+                color_discrete_sequence=['#3c6856'],hover_data=['cancellation_rate_pct','mean_adr'],labels={'bookings':'Bookings',market_col:''}))
         with right:
             hotel_rates=summarize(filtered,'hotel')
             chart(px.bar(hotel_rates,x='hotel',y='cancellation_rate_pct',text_auto='.1f',title='Cancellation rate by hotel',
@@ -220,7 +177,7 @@ if page == 'Overview':
         rates=cell.pivot(index='lead_time_band',columns='stay_band',values='mean')*100
         counts=cell.pivot(index='lead_time_band',columns='stay_band',values='size').reindex(index=rates.index,columns=rates.columns)
         heat=go.Figure(go.Heatmap(z=rates.values,x=rates.columns.astype(str),y=rates.index.astype(str),customdata=counts.values,
-            colorscale=[[0,'#eef2f5'],[1,'#294d73']],zmin=0,zmax=100,colorbar=dict(title='Rate %'),
+            colorscale=[[0,'#f0f1e7'],[1,'#3c6856']],zmin=0,zmax=100,colorbar=dict(title='Rate %'),
             hovertemplate='Lead time: %{y}<br>Stay: %{x}<br>Cancellation: %{z:.1f}%<br>Bookings: %{customdata}<extra></extra>'))
         heat.update_layout(title='Cancellation profile · booking lead time × stay length')
         chart(heat,380)
