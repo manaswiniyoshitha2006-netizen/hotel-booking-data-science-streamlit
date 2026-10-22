@@ -5,29 +5,58 @@ import json
 import zipfile
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 import streamlit as st
 from analysis import (REQUIRED, demo_data, prepare, summarize, monthly_summary,
                       wilson_interval, permutation_comparison, findings)
 
-st.set_page_config(page_title='StayScope · Hotel Booking Analytics', page_icon='🏨', layout='wide')
+st.set_page_config(page_title='Hotel Booking Analytics', page_icon='▦', layout='wide')
 px.defaults.template = 'plotly_white'
-px.defaults.color_discrete_sequence = ['#087f8c', '#ef8354', '#6854a3', '#a5be00', '#4361ee']
+px.defaults.color_discrete_sequence = ['#294d73', '#b99452', '#708b9c', '#7c796a', '#b7c6cf']
 st.markdown('''<style>
-.stApp {background:#f6f8fb;color:#16263b}
-[data-testid="stSidebar"] {background:#fff;border-right:1px solid #e2e8f0}
-.block-container {padding-top:2.3rem;max-width:1500px}
-h1,h2,h3 {letter-spacing:-.035em}
-[data-testid="stMetric"] {background:white;border:1px solid #e2e8f0;border-radius:16px;padding:18px 20px}
-[data-testid="stMetricLabel"] {color:#627084;font-size:13px}
-[data-testid="stMetricValue"] {color:#17334a;font-size:29px}
-.hero {background:linear-gradient(115deg,#123347,#087f8c);border-radius:20px;padding:30px 34px;margin-bottom:20px;color:white}
-.hero h1 {font-size:36px;color:white;margin:6px 0 8px;padding:0}
-.hero p {color:#d5edf0;margin:0;max-width:760px;font-size:15px}
-.eyebrow {font-size:11px;letter-spacing:.18em;font-weight:700;color:#98e5d5}
-.insight {background:white;border:1px solid #e2e8f0;border-left:4px solid #087f8c;border-radius:12px;padding:16px 20px;margin-bottom:12px;min-height:100px}
-.insight small {color:#087f8c;font-weight:700;letter-spacing:.08em}
-.insight p {margin:7px 0 0;font-size:14px}
-[data-testid="stPlotlyChart"] {background:white;border:1px solid #e2e8f0;border-radius:14px;padding:10px}
+.stApp {background:#f4f5f7;color:#202e3d}
+.block-container {padding:4rem 2.1rem 2rem;max-width:1600px}
+h1,h2,h3 {letter-spacing:-.025em;font-weight:600!important}
+h3 {font-size:19px!important;padding-top:12px!important}
+[data-testid="stHeader"] {background:#f4f5f7}
+[data-testid="stSidebar"] {background:#172636;border-right:1px solid #172636}
+[data-testid="stSidebar"] * {color:#e1e7ee}
+[data-testid="stSidebar"] [data-baseweb="select"] * {color:#26384a}
+[data-testid="stSidebar"] input {color:#26384a}
+[data-testid="stSidebar"] button {color:#26384a}
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] {background:#25374a;border:1px dashed #536477}
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button {background:#e1e7ee}
+[data-testid="stSidebar"] [data-testid="stFileUploaderDropzone"] button * {color:#26384a}
+[data-testid="stSidebar"] [role="radiogroup"] {gap:3px}
+[data-testid="stSidebar"] [role="radiogroup"] label {padding:8px 10px;border-radius:3px;margin:0}
+[data-testid="stSidebar"] [role="radiogroup"] label:has(input:checked) {background:#304358;border-left:3px solid #b99452}
+[data-testid="stSidebar"] [role="radiogroup"] label p {font-size:13px}
+[data-testid="stSidebar"] [data-testid="stRadioOption"] {width:100%}
+[data-testid="stSidebar"] [data-testid="stRadioOption"] > div > div:first-child {display:none}
+[data-testid="stMetric"] {background:#fff;border:1px solid #e1e5e9;border-top:3px solid #294d73;border-radius:3px;padding:17px 18px}
+[data-testid="stMetricLabel"] {color:#5d6875;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+[data-testid="stMetricValue"] {color:#1e334a;font-size:30px;font-weight:600;font-variant-numeric:tabular-nums}
+[data-testid="stMetricDelta"] {font-size:11px}
+[data-testid="stMetricDelta"] svg {display:none}
+[data-testid="stPlotlyChart"] {background:white;border:1px solid #e1e5e9;border-radius:3px;padding:8px}
+[data-testid="stDataFrame"] {border:1px solid #e1e5e9;border-radius:3px}
+.identity {padding:3px 0 20px;border-bottom:1px solid #3a4857;margin-bottom:20px}
+.identity-mark {display:inline-block;border:1px solid #b99452;color:#d5bb8c;font:600 17px Georgia;padding:8px 10px;margin-bottom:12px}
+.identity strong {display:block;font-size:15px;color:#fff;letter-spacing:.02em}
+.identity span {font-size:10px;letter-spacing:.15em;color:#9cabb9}
+.masthead {display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #d8dee5;padding:0 0 18px;margin-bottom:16px;gap:20px}
+.masthead .overline {font-size:10px;letter-spacing:.16em;color:#6c7681;text-transform:uppercase;font-weight:600}
+.masthead h1 {font-size:29px;line-height:1.2;margin:7px 0;color:#1c3045;padding:0}
+.masthead p {font-size:13px;line-height:1.5;color:#66727f;margin:0}
+.status {font-size:10px;letter-spacing:.07em;border:1px solid #d8c49e;background:#f6f1e7;color:#786031;padding:6px 9px;white-space:nowrap}
+.source-note {font-size:12px;color:#716443;background:#f7f4ed;border-left:2px solid #b99452;padding:8px 12px;margin-bottom:17px}
+.section-heading {display:flex;justify-content:space-between;align-items:baseline;margin:25px 0 10px;border-bottom:1px solid #d8dee5;padding-bottom:9px}
+.section-heading strong {font-size:15px;color:#233a52;font-weight:600}
+.section-heading span {font-size:11px;color:#79838e}
+.analysis-note {font-size:12px;line-height:1.65;color:#526171;border-top:1px solid #e1e5e9;padding-top:10px;margin-bottom:12px}
+.stDownloadButton button,.stButton button {border-radius:3px;font-size:12px}
+@media(max-width:700px){.block-container{padding:4rem 1rem 1rem}.masthead h1{font-size:25px}.masthead{gap:10px}.status{font-size:9px}}
 </style>''', unsafe_allow_html=True)
 
 
@@ -36,10 +65,18 @@ def load_csv(content):
     return pd.read_csv(BytesIO(content))
 
 
-def chart(fig):
-    fig.update_layout(margin=dict(l=15, r=15, t=50, b=20), font=dict(family='Arial', color='#34465a'),
-        paper_bgcolor='white', plot_bgcolor='white', legend_title_text='', height=360)
+def chart(fig, height=340):
+    fig.update_layout(margin=dict(l=20, r=20, t=55, b=30), font=dict(family='Arial', color='#526171', size=11),
+        title_font=dict(size=14, color='#263d54'), paper_bgcolor='white', plot_bgcolor='white',
+        legend_title_text='', height=height, hoverlabel=dict(bgcolor='#172636',font_color='white'),
+        legend=dict(orientation='h',y=-.2,x=0), colorway=px.defaults.color_discrete_sequence)
+    fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e1e5e9')
+    fig.update_yaxes(gridcolor='#edf0f3', zeroline=False)
     st.plotly_chart(fig, width='stretch')
+
+
+def section(title, detail):
+    st.markdown(f'<div class="section-heading"><strong>{html.escape(title)}</strong><span>{html.escape(detail)}</span></div>',unsafe_allow_html=True)
 
 
 def table_download(label, table, filename):
@@ -53,11 +90,10 @@ def reset_filters():
 
 
 with st.sidebar:
-    st.markdown('## 🏨 StayScope')
-    st.caption('HOTEL BOOKING ANALYTICS')
+    st.markdown('<div class="identity"><div class="identity-mark">HB</div><strong>Hotel Booking Analytics</strong><span>RESEARCH & PERFORMANCE</span></div>',unsafe_allow_html=True)
     page = st.radio('Workspace', ['Overview', 'Seasonality', 'Cancellations', 'Guests & markets',
         'Hotel comparison', 'Statistics lab', 'Data explorer', 'Quality & methodology', 'Reports & Tableau'],
-        label_visibility='collapsed')
+        label_visibility='collapsed',format_func=lambda p: {'Overview':'01  Portfolio overview','Seasonality':'02  Demand & seasonality','Cancellations':'03  Cancellation analysis','Guests & markets':'04  Guest & market mix','Hotel comparison':'05  Hotel benchmarking','Statistics lab':'06  Statistical analysis','Data explorer':'07  Booking register','Quality & methodology':'08  Data quality','Reports & Tableau':'09  Reporting & exports'}[p])
     st.divider()
     upload = st.file_uploader('Your booking dataset', type=['csv'], help='Upload the raw hotel_bookings.csv.')
     with st.expander('Cleaning settings'):
@@ -105,13 +141,21 @@ with st.sidebar:
     st.button('Reset filters', on_click=reset_filters, width='stretch')
     st.caption(f'{len(filtered):,} / {len(clean):,} cleaned records')
 
-st.markdown('''<div class="hero"><div class="eyebrow">BOOKINGS → EVIDENCE → INSIGHT</div>
-<h1>See the story behind every stay.</h1>
-<p>Your hotel booking research workspace. Explore demand, understand cancellations,
-compare guests and turn your analysis into a clear report.</p></div>''', unsafe_allow_html=True)
+page_titles = {'Overview':('Portfolio overview','Booking demand, commercial indicators and cancellation exposure.'),
+    'Seasonality':('Demand & seasonality','Arrival patterns across months, years and weekdays.'),
+    'Cancellations':('Cancellation analysis','Observed outcomes with sample sizes and statistical uncertainty.'),
+    'Guests & markets':('Guest & market mix','Composition, booking channels and stay characteristics.'),
+    'Hotel comparison':('Hotel benchmarking','Compare observed performance under a consistent set of filters.'),
+    'Statistics lab':('Statistical analysis','Relationships and differences between observed booking groups.'),
+    'Data explorer':('Booking register','Search, inspect and export the records behind the analysis.'),
+    'Quality & methodology':('Data quality & methodology','Source coverage, validation and preparation decisions.'),
+    'Reports & Tableau':('Reporting & exports','Analysis reports, supporting tables and Tableau data handoffs.')}
+heading, description = page_titles[page]
+status = 'SYNTHETIC DATA' if source == 'Synthetic demo' else 'SOURCE DATA'
+st.markdown(f'<div class="masthead"><div><div class="overline">Hotel booking research / {html.escape(heading)}</div><h1>{html.escape(heading)}</h1><p>{description}</p></div><div class="status">{status}</div></div>', unsafe_allow_html=True)
 if source == 'Synthetic demo':
-    st.info('DEMO DATA · 1,500 synthetic bookings. Upload your CSV for actual findings. These examples are not notebook results.')
-st.caption(f'{source}  /  {page}  /  {len(filtered):,} selected bookings')
+    st.markdown('<div class="source-note">Illustrative dataset · Upload the original booking CSV to use actual project data. All figures below currently use synthetic records.</div>',unsafe_allow_html=True)
+st.caption(f'{filtered.arrival_date.min():%d %b %Y} – {filtered.arrival_date.max():%d %b %Y} · {len(filtered):,} selected records · {filtered.hotel.nunique()} hotel types' if len(filtered) else 'No records selected')
 if filtered.empty:
     st.warning('No bookings match these filters. Adjust your selections.')
     st.stop()
@@ -123,26 +167,69 @@ groups = [c for c in ['hotel', 'market_segment', 'deposit_type', 'customer_type'
 
 if page == 'Overview':
     a, b, c, d = st.columns(4)
-    a.metric('Bookings', f'{len(filtered):,}')
-    b.metric('Cancellation rate', f'{filtered.is_canceled.mean():.1%}')
-    c.metric('Average daily rate', f'{filtered.adr.mean():,.2f}')
-    d.metric('Average stay', f'{filtered.total_nights.mean():.1f} nights')
-    st.write('')
-    left, right = st.columns([2, 1])
-    with left:
-        chart(px.area(monthly, x='month', y='bookings', title='Arrival demand over time',
-            labels={'month':'Arrival month', 'bookings':'Bookings'}))
-    with right:
-        counts = filtered.is_canceled.map({0:'Not canceled', 1:'Canceled'}).value_counts().rename_axis('Outcome').reset_index(name='Bookings')
-        chart(px.pie(counts, names='Outcome', values='Bookings', hole=.72, title='Booking outcomes'))
-    st.subheader('What the selected data shows')
-    columns = st.columns(2)
-    for i, note in enumerate(insights):
-        columns[i % 2].markdown(f'<div class="insight"><small>OBSERVATION {i+1:02d}</small><p>{html.escape(note)}</p></div>', unsafe_allow_html=True)
-    st.caption('Descriptive observations are generated from current filters. They are not forecasts or causal findings.')
+    a.metric('Bookings', f'{len(filtered):,}',delta=f'{len(filtered)/len(clean):.1%} of source',delta_color='off')
+    b.metric('Cancellation rate', f'{filtered.is_canceled.mean():.1%}',
+        delta=f'{(filtered.is_canceled.mean()-clean.is_canceled.mean())*100:+.1f} pp vs source',delta_color='off')
+    c.metric('Average daily rate', f'{filtered.adr.mean():,.2f}',
+        delta=f'{filtered.adr.mean()-clean.adr.mean():+.2f} vs source',delta_color='off')
+    d.metric('Average stay', f'{filtered.total_nights.mean():.1f} nights',
+        delta=f'{filtered.total_nights.mean()-clean.total_nights.mean():+.1f} vs source',delta_color='off')
+    st.caption('Benchmark: all cleaned source records, before dashboard filters. ADR is expressed in source currency. Booking volume is not occupancy.')
+    summary_tab, economics_tab, detail_tab = st.tabs(['Performance summary','Booking economics','Portfolio detail'])
+    with summary_tab:
+        section('Demand and pricing','Monthly arrivals · observed bookings')
+        trend = make_subplots(specs=[[{'secondary_y':True}]])
+        trend.add_trace(go.Bar(x=monthly.month,y=monthly.bookings-monthly.cancellations,name='Not canceled',marker_color='#294d73'),secondary_y=False)
+        trend.add_trace(go.Bar(x=monthly.month,y=monthly.cancellations,name='Canceled',marker_color='#b99452'),secondary_y=False)
+        trend.add_trace(go.Scatter(x=monthly.month,y=monthly.mean_adr,name='Mean ADR',mode='lines+markers',line=dict(color='#6e8580',width=2),marker=dict(size=4)),secondary_y=True)
+        trend.update_layout(barmode='stack',title='Booking volume and average daily rate')
+        trend.update_yaxes(title_text='Bookings',secondary_y=False)
+        trend.update_yaxes(title_text='ADR · source currency',secondary_y=True,showgrid=False)
+        chart(trend,380)
+        left,right = st.columns([1.25,1])
+        with left:
+            market_col = 'market_segment' if 'market_segment' in filtered else 'guest_profile'
+            market = summarize(filtered,market_col).sort_values('bookings').tail(8)
+            chart(px.bar(market,x='bookings',y=market_col,orientation='h',title='Booking mix by '+market_col.replace('_',' '),
+                color_discrete_sequence=['#294d73'],hover_data=['cancellation_rate_pct','mean_adr'],labels={'bookings':'Bookings',market_col:''}))
+        with right:
+            hotel_rates=summarize(filtered,'hotel')
+            chart(px.bar(hotel_rates,x='hotel',y='cancellation_rate_pct',text_auto='.1f',title='Cancellation rate by hotel',
+                color='hotel',hover_data=['bookings'],labels={'hotel':'','cancellation_rate_pct':'Cancellation rate (%)'}))
+        section('Hotel performance','Rates and volumes under the current selection')
+        portfolio=summarize(filtered,'hotel')
+        portfolio['Booking share (%)']=portfolio.bookings/len(filtered)*100
+        st.dataframe(portfolio.rename(columns={'hotel':'Hotel','bookings':'Bookings','cancellations':'Canceled','mean_adr':'Mean ADR','mean_lead_days':'Lead time (days)','cancellation_rate_pct':'Cancellation (%)','ci_lower_pct':'95% lower (%)','ci_upper_pct':'95% upper (%)'}).round(2),hide_index=True,width='stretch',
+            column_config={'Booking share (%)':st.column_config.ProgressColumn(min_value=0,max_value=100,format='%.1f%%')})
+    with economics_tab:
+        section('Booking value composition','ADR × nights · estimates, not realized revenue')
+        value=filtered.assign(Outcome=filtered.is_canceled.map({0:'Not canceled',1:'Canceled'})).groupby('Outcome',as_index=False).agg(
+            Bookings=('adr','size'),Estimated_value=('booking_value_estimate','sum'),Room_nights=('total_nights','sum'))
+        left,right=st.columns(2)
+        with left:
+            chart(px.bar(value,x='Outcome',y='Estimated_value',color='Outcome',title='Estimated booked value by outcome',labels={'Estimated_value':'ADR × nights · source currency'}))
+        with right:
+            chart(px.box(filtered,x='hotel',y='adr',color='hotel',points=False,title='Rate distribution by hotel',labels={'hotel':'Hotel','adr':'ADR · source currency'}))
+        st.dataframe(value.rename(columns={'Estimated_value':'Estimated booking value','Room_nights':'Booked nights'}).round(2),hide_index=True,width='stretch')
+        section('Price distribution','Selected booking records')
+        chart(px.histogram(filtered,x='adr',color='hotel',nbins=45,barmode='overlay',opacity=.7,title='Daily rate distribution',labels={'adr':'ADR · source currency'}))
+        st.markdown('<div class="analysis-note">Estimated value uses the daily rate and stated length of stay. It does not account for taxes, refunds, room quantity, no-shows or actual payments. A non-canceled reservation is not evidence of collected revenue.</div>',unsafe_allow_html=True)
+    with detail_tab:
+        section('Cancellation by booking window and stay length','Cell values show rate; hover for sample size')
+        cell=filtered.groupby(['lead_time_band','stay_band'],observed=True).is_canceled.agg(['mean','size']).reset_index()
+        rates=cell.pivot(index='lead_time_band',columns='stay_band',values='mean')*100
+        counts=cell.pivot(index='lead_time_band',columns='stay_band',values='size').reindex(index=rates.index,columns=rates.columns)
+        heat=go.Figure(go.Heatmap(z=rates.values,x=rates.columns.astype(str),y=rates.index.astype(str),customdata=counts.values,
+            colorscale=[[0,'#eef2f5'],[1,'#294d73']],zmin=0,zmax=100,colorbar=dict(title='Rate %'),
+            hovertemplate='Lead time: %{y}<br>Stay: %{x}<br>Cancellation: %{z:.1f}%<br>Bookings: %{customdata}<extra></extra>'))
+        heat.update_layout(title='Cancellation profile · booking lead time × stay length')
+        chart(heat,380)
+        section('Monthly operating table','Blank rates indicate months with no observations')
+        st.dataframe(monthly.rename(columns={'month':'Arrival month','bookings':'Bookings','cancellations':'Canceled','mean_adr':'Mean ADR','mean_lead_days':'Lead time (days)','cancellation_rate_pct':'Cancellation (%)','ci_lower_pct':'95% lower (%)','ci_upper_pct':'95% upper (%)'}).round(2),hide_index=True,width='stretch')
+        table_download('Export monthly performance',monthly,'monthly_performance.csv')
 
 elif page == 'Seasonality':
-    st.subheader('When do guests arrive?')
+    st.subheader('Arrival demand by period')
     measure = st.selectbox('Monthly measure', ['bookings', 'mean_adr', 'cancellation_rate_pct'],
         format_func=lambda x: {'bookings':'Booking volume', 'mean_adr':'Average daily rate', 'cancellation_rate_pct':'Cancellation rate (%)'}[x])
     chart(px.line(monthly, x='month', y=measure, markers=True, title='Monthly arrival trends'))
@@ -157,7 +244,7 @@ elif page == 'Seasonality':
     st.dataframe(monthly.round(2), hide_index=True, width='stretch')
 
 elif page == 'Cancellations':
-    st.subheader('Understand observed cancellation patterns')
+    st.subheader('Cancellation exposure by booking segment')
     lo, hi = wilson_interval(filtered.is_canceled.sum(), len(filtered))
     a,b,c = st.columns(3)
     a.metric('Canceled bookings', f'{int(filtered.is_canceled.sum()):,}')
@@ -181,7 +268,7 @@ elif page == 'Cancellations':
     st.caption('Rates = canceled bookings / all selected bookings in each group. Wilson intervals assume independent bookings. Repeat guests or group bookings may violate that assumption. Associations do not establish causation.')
 
 elif page == 'Guests & markets':
-    st.subheader('Who books, and how do they stay?')
+    st.subheader('Guest composition and distribution channels')
     left,right = st.columns(2)
     with left:
         chart(px.bar(summarize(filtered,'guest_profile'), x='guest_profile', y='bookings', color='guest_profile', title='Guest composition'))
@@ -199,7 +286,7 @@ elif page == 'Guests & markets':
     chart(px.box(filtered, x='guest_profile', y='adr', color='hotel', points=False, title='Daily rates by guest composition'))
 
 elif page == 'Hotel comparison':
-    st.subheader('Compare two hotels on the same filters')
+    st.subheader('Comparative hotel performance')
     hotels = sorted(filtered.hotel.unique())
     if len(hotels) < 2:
         st.info('Select at least two hotel types in the sidebar to compare them.')
@@ -223,7 +310,7 @@ elif page == 'Hotel comparison':
         st.caption('Observed averages reflect guest mix, timing and selection. They do not measure hotel quality or prove an effect of hotel type.')
 
 elif page == 'Statistics lab':
-    st.subheader('Explore relationships and test differences')
+    st.subheader('Correlation and group comparisons')
     correlation_tab, test_tab = st.tabs(['Correlation explorer', 'Two-group comparison'])
     with correlation_tab:
         numeric = ['adr','lead_time','total_nights','adults','children','babies','guest_count','is_canceled']
@@ -262,7 +349,7 @@ elif page == 'Statistics lab':
                     st.warning(str(exc))
 
 elif page == 'Data explorer':
-    st.subheader('Inspect the records behind your charts')
+    st.subheader('Selected booking records')
     search = st.text_input('Search across text columns', placeholder='Try a hotel, country or market segment')
     view = filtered.copy()
     if search:
@@ -282,7 +369,7 @@ elif page == 'Data explorer':
         st.info('Choose at least one visible column.')
 
 elif page == 'Quality & methodology':
-    st.subheader('Make every cleaning decision visible')
+    st.subheader('Data preparation and validation')
     st.caption('Full uploaded dataset before dashboard filters.')
     a,b,c = st.columns(3)
     a.metric('Rows uploaded', f'{len(raw):,}')
@@ -313,14 +400,14 @@ The original notebook remains unchanged, including its historical ML sections; t
     table_download('Download column quality report', quality, 'column_quality.csv')
 
 elif page == 'Reports & Tableau':
-    st.subheader('Take your findings into the review room')
+    st.subheader('Analysis deliverables')
     settings = {'source':source, 'filters':applied_filters, 'deduplicate':deduplicate,
         'iqr_capping':cap, 'minimum_group_size':int(minimum), 'selected_rows':len(filtered)}
-    report = ('<!doctype html><html><head><meta charset="utf-8"><title>StayScope analysis report</title>'
+    report = ('<!doctype html><html><head><meta charset="utf-8"><title>Hotel Booking Analysis Report</title>'
         '<style>body{font:16px Arial;color:#183247;max-width:1000px;margin:50px auto;padding:24px}'
         'h1{color:#087f8c}table{border-collapse:collapse;width:100%;font-size:13px}'
         'td,th{padding:9px;border:1px solid #ddd;text-align:left}pre{white-space:pre-wrap}</style></head><body>'
-        '<h1>StayScope · Hotel booking analysis</h1><p>Source: '+html.escape(source)+'</p><h2>Findings</h2><ul>'
+        '<h1>Hotel Booking Analysis</h1><p>Source: '+html.escape(source)+'</p><h2>Findings</h2><ul>'
         + ''.join('<li>'+html.escape(note)+'</li>' for note in insights) + '</ul><h2>Analysis settings</h2><pre>'
         + html.escape(json.dumps(settings, indent=2)) + '</pre><h2>Hotel comparison</h2>'
         + summarize(filtered,'hotel').round(2).to_html(index=False, escape=True) + '<h2>Monthly trends</h2>'
@@ -358,4 +445,4 @@ Exports reflect current filters and cleaning settings. Refresh by downloading a 
     st.download_button('Download CSV template', demo_data().head(0).to_csv(index=False).encode(), 'hotel_bookings_template.csv', 'text/csv')
 
 st.divider()
-st.caption('STAYSCOPE  ·  Exploratory data science  ·  Original notebook preserved  ·  No predictive models')
+st.caption('HOTEL BOOKING ANALYTICS  /  Historical booking research  /  Source currency applies to all monetary values')

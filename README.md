@@ -1,4 +1,4 @@
-# StayScope · Hotel Booking Data Science
+# Hotel Booking Analytics
 
 An interactive descriptive data science app based on the cleaning and exploratory analysis in `FODS_REVIEW2.ipynb`. Explore booking volume, seasonality, ADR, lead time and cancellation rates with sample counts. The app performs no model training or prediction. The notebook is archived byte-for-byte unchanged, including its original ML sections and original local dataset path.
 
@@ -6,7 +6,7 @@ An interactive descriptive data science app based on the cleaning and explorator
 
 | Section | Features |
 | --- | --- |
-| Overview | KPI cards, monthly demand, outcome breakdown, observations generated from selected data |
+| Overview | Source benchmarks, monthly demand and pricing, hotel performance table, booking economics and cancellation matrix |
 | Seasonality | Monthly booking/ADR/cancellation trends, arrival calendar heatmap, weekday analysis |
 | Cancellations | Group rates, booking counts, 95% Wilson intervals, configurable group-size threshold |
 | Guests & markets | Guest composition, stay-length bands, top markets, rates by guest profile |

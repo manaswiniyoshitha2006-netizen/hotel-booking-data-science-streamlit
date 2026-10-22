@@ -46,7 +46,8 @@ def test_streamlit_demo_and_empty_filters():
 def test_every_workspace_page_and_statistics():
     from streamlit.testing.v1 import AppTest
     app = AppTest.from_file('app.py').run(timeout=30)
-    for page in app.radio[0].options:
+    for page in ['Overview','Seasonality','Cancellations','Guests & markets','Hotel comparison',
+                 'Statistics lab','Data explorer','Quality & methodology','Reports & Tableau']:
         app.radio[0].set_value(page).run(timeout=30)
         assert not app.exception, (page, [e.value for e in app.exception])
     app.radio[0].set_value('Statistics lab').run()
