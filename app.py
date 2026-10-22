@@ -13,7 +13,7 @@ from analysis import (REQUIRED, demo_data, prepare, summarize, monthly_summary,
 
 st.set_page_config(page_title='Hotel Booking Analytics', page_icon='▦', layout='wide')
 px.defaults.template = 'plotly_white'
-px.defaults.color_discrete_sequence = ['#3c6856', '#c38b67', '#91a58b', '#b1a579', '#d0d9c6']
+px.defaults.color_discrete_sequence = ['#3455ff', '#ff925e', '#a28aff', '#bad954', '#a9b8dd']
 st.markdown('<style>' + (Path(__file__).parent / 'ui.css').read_text(encoding='utf-8') + '</style>', unsafe_allow_html=True)
 
 
@@ -23,12 +23,12 @@ def load_csv(content):
 
 
 def chart(fig, height=340):
-    fig.update_layout(margin=dict(l=20, r=20, t=55, b=30), font=dict(family='Arial, sans-serif', color='#808a78', size=11),
-        title_font=dict(size=14, color='#334d3e'), paper_bgcolor='#fffefa', plot_bgcolor='#fffefa',
-        legend_title_text='', height=height, hoverlabel=dict(bgcolor='#254c40',font_color='white'),
+    fig.update_layout(margin=dict(l=20, r=20, t=55, b=30), font=dict(family='Arial, sans-serif', color='#77819a', size=11),
+        title_font=dict(size=14, color='#242c41'), paper_bgcolor='#ffffff', plot_bgcolor='#ffffff',
+        legend_title_text='', height=height, hoverlabel=dict(bgcolor='#1c2230',font_color='white'),
         legend=dict(orientation='h',y=-.2,x=0), colorway=px.defaults.color_discrete_sequence)
-    fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e4e7dc')
-    fig.update_yaxes(gridcolor='#eceee5', zeroline=False)
+    fig.update_xaxes(showgrid=False, zeroline=False, linecolor='#e1e6f0')
+    fig.update_yaxes(gridcolor='#edf0f6', zeroline=False)
     st.plotly_chart(fig, width='stretch')
 
 
@@ -108,8 +108,9 @@ page_titles = {'Overview':('Portfolio overview','Booking demand, commercial indi
     'Quality & methodology':('Data quality & methodology','Source coverage, validation and preparation decisions.'),
     'Reports & Tableau':('Reporting & exports','Analysis reports, supporting tables and Tableau data handoffs.')}
 heading, description = page_titles[page]
+page_number = list(page_titles).index(page) + 1
 status = 'SYNTHETIC DATA' if source == 'Synthetic demo' else 'SOURCE DATA'
-st.markdown(f'<div class="masthead"><div><div class="overline">Hotel booking research / {html.escape(heading)}</div><h1>{html.escape(heading)}</h1><p>{description}</p></div><div class="status">{status}</div></div>', unsafe_allow_html=True)
+st.markdown(f'<div class="masthead"><div class="page-number">{page_number:02d}</div><div><div class="overline">Hotel booking research / {html.escape(heading)}</div><h1>{html.escape(heading)}</h1><p>{description}</p></div><div class="status">{status}</div></div>', unsafe_allow_html=True)
 if source == 'Synthetic demo':
     st.markdown('<div class="source-note">Illustrative dataset · Upload the original booking CSV to use actual project data. All figures below currently use synthetic records.</div>',unsafe_allow_html=True)
 st.caption(f'{filtered.arrival_date.min():%d %b %Y} – {filtered.arrival_date.max():%d %b %Y} · {len(filtered):,} selected records · {filtered.hotel.nunique()} hotel types' if len(filtered) else 'No records selected')
@@ -123,22 +124,23 @@ groups = [c for c in ['hotel', 'market_segment', 'deposit_type', 'customer_type'
           'country', 'guest_profile', 'lead_time_band', 'stay_band'] if c in filtered]
 
 if page == 'Overview':
-    a, b, c, d = st.columns(4)
-    a.metric('Bookings', f'{len(filtered):,}',delta=f'{len(filtered)/len(clean):.1%} of source',delta_color='off')
-    b.metric('Cancellation rate', f'{filtered.is_canceled.mean():.1%}',
-        delta=f'{(filtered.is_canceled.mean()-clean.is_canceled.mean())*100:+.1f} pp vs source',delta_color='off')
-    c.metric('Average daily rate', f'{filtered.adr.mean():,.2f}',
-        delta=f'{filtered.adr.mean()-clean.adr.mean():+.2f} vs source',delta_color='off')
-    d.metric('Average stay', f'{filtered.total_nights.mean():.1f} nights',
-        delta=f'{filtered.total_nights.mean()-clean.total_nights.mean():+.1f} vs source',delta_color='off')
+    with st.container(key='kpi_strip'):
+        a, b, c, d = st.columns([1.15,1,1,1])
+        a.metric('Bookings', f'{len(filtered):,}',delta=f'{len(filtered)/len(clean):.1%} of source',delta_color='off')
+        b.metric('Cancellation rate', f'{filtered.is_canceled.mean():.1%}',
+            delta=f'{(filtered.is_canceled.mean()-clean.is_canceled.mean())*100:+.1f} pp vs source',delta_color='off')
+        c.metric('Average daily rate', f'{filtered.adr.mean():,.2f}',
+            delta=f'{filtered.adr.mean()-clean.adr.mean():+.2f} vs source',delta_color='off')
+        d.metric('Average stay', f'{filtered.total_nights.mean():.1f} nights',
+            delta=f'{filtered.total_nights.mean()-clean.total_nights.mean():+.1f} vs source',delta_color='off')
     st.caption('Benchmark: all cleaned source records, before dashboard filters. ADR is expressed in source currency. Booking volume is not occupancy.')
     summary_tab, economics_tab, detail_tab = st.tabs(['Performance summary','Booking economics','Portfolio detail'])
     with summary_tab:
         section('Demand and pricing','Monthly arrivals · observed bookings')
         trend = make_subplots(specs=[[{'secondary_y':True}]])
-        trend.add_trace(go.Bar(x=monthly.month,y=monthly.bookings-monthly.cancellations,name='Not canceled',marker_color='#3c6856'),secondary_y=False)
-        trend.add_trace(go.Bar(x=monthly.month,y=monthly.cancellations,name='Canceled',marker_color='#c38b67'),secondary_y=False)
-        trend.add_trace(go.Scatter(x=monthly.month,y=monthly.mean_adr,name='Mean ADR',mode='lines+markers',line=dict(color='#b3a06e',width=2),marker=dict(size=4)),secondary_y=True)
+        trend.add_trace(go.Bar(x=monthly.month,y=monthly.bookings-monthly.cancellations,name='Not canceled',marker_color='#3455ff'),secondary_y=False)
+        trend.add_trace(go.Bar(x=monthly.month,y=monthly.cancellations,name='Canceled',marker_color='#ff925e'),secondary_y=False)
+        trend.add_trace(go.Scatter(x=monthly.month,y=monthly.mean_adr,name='Mean ADR',mode='lines+markers',line=dict(color='#8a74db',width=2),marker=dict(size=4)),secondary_y=True)
         trend.update_layout(barmode='stack',title='Booking volume and average daily rate')
         trend.update_yaxes(title_text='Bookings',secondary_y=False)
         trend.update_yaxes(title_text='ADR · source currency',secondary_y=True,showgrid=False)
@@ -148,7 +150,7 @@ if page == 'Overview':
             market_col = 'market_segment' if 'market_segment' in filtered else 'guest_profile'
             market = summarize(filtered,market_col).sort_values('bookings').tail(8)
             chart(px.bar(market,x='bookings',y=market_col,orientation='h',title='Booking mix by '+market_col.replace('_',' '),
-                color_discrete_sequence=['#3c6856'],hover_data=['cancellation_rate_pct','mean_adr'],labels={'bookings':'Bookings',market_col:''}))
+                color_discrete_sequence=['#3455ff'],hover_data=['cancellation_rate_pct','mean_adr'],labels={'bookings':'Bookings',market_col:''}))
         with right:
             hotel_rates=summarize(filtered,'hotel')
             chart(px.bar(hotel_rates,x='hotel',y='cancellation_rate_pct',text_auto='.1f',title='Cancellation rate by hotel',
@@ -177,7 +179,7 @@ if page == 'Overview':
         rates=cell.pivot(index='lead_time_band',columns='stay_band',values='mean')*100
         counts=cell.pivot(index='lead_time_band',columns='stay_band',values='size').reindex(index=rates.index,columns=rates.columns)
         heat=go.Figure(go.Heatmap(z=rates.values,x=rates.columns.astype(str),y=rates.index.astype(str),customdata=counts.values,
-            colorscale=[[0,'#f0f1e7'],[1,'#3c6856']],zmin=0,zmax=100,colorbar=dict(title='Rate %'),
+            colorscale=[[0,'#edf0ff'],[1,'#3455ff']],zmin=0,zmax=100,colorbar=dict(title='Rate %'),
             hovertemplate='Lead time: %{y}<br>Stay: %{x}<br>Cancellation: %{z:.1f}%<br>Bookings: %{customdata}<extra></extra>'))
         heat.update_layout(title='Cancellation profile · booking lead time × stay length')
         chart(heat,380)
