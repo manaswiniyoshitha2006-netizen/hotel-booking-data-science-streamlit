@@ -1,6 +1,24 @@
-# Hotel Booking Data Science Streamlit
+# StayScope · Hotel Booking Data Science
 
 An interactive descriptive data science app based on the cleaning and exploratory analysis in `FODS_REVIEW2.ipynb`. Explore booking volume, seasonality, ADR, lead time and cancellation rates with sample counts. The app performs no model training or prediction. The notebook is archived byte-for-byte unchanged, including its original ML sections and original local dataset path.
+
+## Research workspace
+
+| Section | Features |
+| --- | --- |
+| Overview | KPI cards, monthly demand, outcome breakdown, observations generated from selected data |
+| Seasonality | Monthly booking/ADR/cancellation trends, arrival calendar heatmap, weekday analysis |
+| Cancellations | Group rates, booking counts, 95% Wilson intervals, configurable group-size threshold |
+| Guests & markets | Guest composition, stay-length bands, top markets, rates by guest profile |
+| Hotel comparison | Side-by-side averages, cancellation rates, ADR distributions and lead times |
+| Statistics lab | Pearson/Spearman correlation; reproducible two-sided permutation tests |
+| Data explorer | Text search, column selection, sorting and complete matching-record download |
+| Quality & methodology | Cleaning audit, retention, column types, missingness, unique counts and rules |
+| Reports & Tableau | Printable HTML report, CSV exports, input template and complete ZIP analysis pack |
+
+All sections respect hotel/market/country/date/outcome filters, except data quality which audits the complete source. Reset filters restores defaults. An outcome filter makes cancellation rates conditional; the cancellation page flags that setting.
+
+Permutation tests use a fixed seed, 2,000 permutations and at most 2,000 sampled observations per group. The reported effect and counts use the same sampled observations. No multiple-comparison correction is applied; this is exploratory inference. Wilson intervals assume independent bookings. Correlations for constant features remain undefined. Missing calendar months have zero observed bookings and undefined rates.
 
 ## Run
 
